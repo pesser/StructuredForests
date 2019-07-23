@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages, Extension
 
-USE_CYTHON = True
+USE_CYTHON = False
 
 ext = '.pyx' if USE_CYTHON else '.c'
 extpp = '.pyx' if USE_CYTHON else '.cpp'
