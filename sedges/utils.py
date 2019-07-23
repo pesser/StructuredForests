@@ -3,10 +3,7 @@ __author__ = 'artanis'
 import cv2
 import numpy as N
 
-import pyximport
-pyximport.install(build_dir=".pyxbld",
-                  setup_args={"include_dirs": N.get_include()})
-from _utils import histogram_core, pdist_core
+from sedges._utils import histogram_core, pdist_core
 
 
 def resize(src, size):

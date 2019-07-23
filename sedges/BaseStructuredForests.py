@@ -3,7 +3,7 @@ __author__ = 'artanis'
 import cv2
 import numpy as N
 from skimage.util import view_as_windows
-from utils import resize, conv_tri, rgb2luv, gradient, histogram, pdist
+from sedges.utils import resize, conv_tri, rgb2luv, gradient, histogram, pdist
 
 
 class BaseStructuredForests(object):

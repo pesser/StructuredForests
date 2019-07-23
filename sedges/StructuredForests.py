@@ -7,15 +7,12 @@ import cv2
 import numpy as N
 from math import floor, ceil, log
 from scipy.ndimage.morphology import distance_transform_edt
-from BaseStructuredForests import BaseStructuredForests
-from RandomForests import RandomForests
-from RobustPCA import robust_pca
-from utils import conv_tri, gradient
+from sedges.BaseStructuredForests import BaseStructuredForests
+from sedges.RandomForests import RandomForests
+from sedges.RobustPCA import robust_pca
+from sedges.utils import conv_tri, gradient
 
-import pyximport
-pyximport.install(build_dir=".pyxbld",
-                  setup_args={"include_dirs": N.get_include()})
-from _StructuredForests import predict_core, non_maximum_supr
+from sedges._StructuredForests import predict_core, non_maximum_supr
 
 
 class StructuredForests(BaseStructuredForests):
@@ -507,30 +504,7 @@ def bsds500_test(model, input_root, output_root):
     print()
 
 
-def my_test(model, input_root, output_root):
-    from skimage import img_as_float, img_as_ubyte
-    from skimage.io import imread, imsave
-
-    if not os.path.exists(output_root):
-        os.makedirs(output_root)
-
-    image_dir = os.path.join(input_root)
-    file_names = [name for name in os.listdir(image_dir) if name[-3:] in ["jpg", "png"]]
-    n_image = len(file_names)
-
-    for i, file_name in enumerate(file_names):
-        img = img_as_float(imread(os.path.join(image_dir, file_name)))
-
-        edge = img_as_ubyte(model.predict(img))
-
-        imsave(os.path.join(output_root, file_name[:-3] + "png"), edge)
-
-        sys.stdout.write("Processing Image %d/%d\r" % (i + 1, n_image))
-        sys.stdout.flush()
-    print()
-
-
-if __name__ == "__main__":
+def SEdges():
     rand = N.random.RandomState(1)
 
     options = {
@@ -563,7 +537,13 @@ if __name__ == "__main__":
         "nms": True,
     }
 
-    model = StructuredForests(options, rand=rand)
-    #model.train(bsds500_train("toy"))
-    #bsds500_test(model, "toy", "edges")
-    my_test(model, "examples", "edges")
+    model_dir = os.path.join(os.path.dirname(__file__), 'model/')
+
+    model = StructuredForests(options, model_dir = model_dir, rand=rand)
+    return model
+
+
+if __name__ == "__main__":
+    model = SEdges()
+    model.train(bsds500_train("toy"))
+    bsds500_test(model, "toy", "edges")

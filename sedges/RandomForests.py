@@ -3,9 +3,7 @@ __author__ = 'artanis'
 import math
 import numpy as np
 
-import pyximport
-pyximport.install(build_dir=".pyxbld")
-from _RandomForests import find_threshold
+from sedges._RandomForests import find_threshold
 
 
 class RandomForests(object):
