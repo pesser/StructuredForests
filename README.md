@@ -2,9 +2,9 @@
 
 ### Installation
 This is a modification of [Artanis' Python Implementation for Piotr's ICCV
-Paper "Structured Forests for Fast Edge Detection"
-](https://github.com/ArtanisCV/StructuredForests). It works with `Python 3`
-and can be installed with
+Paper "Structured Forests for Fast Edge
+Detection"](https://github.com/ArtanisCV/StructuredForests). It works with
+`Python 3` and can be installed with
 
     pip install git+https://github.com/pesser/StructuredForests.git
 
