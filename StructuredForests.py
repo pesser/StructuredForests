@@ -507,6 +507,29 @@ def bsds500_test(model, input_root, output_root):
     print
 
 
+def my_test(model, input_root, output_root):
+    from skimage import img_as_float, img_as_ubyte
+    from skimage.io import imread, imsave
+
+    if not os.path.exists(output_root):
+        os.makedirs(output_root)
+
+    image_dir = os.path.join(input_root)
+    file_names = filter(lambda name: name[-3:] in ["jpg", "png"], os.listdir(image_dir))
+    n_image = len(file_names)
+
+    for i, file_name in enumerate(file_names):
+        img = img_as_float(imread(os.path.join(image_dir, file_name)))
+
+        edge = img_as_ubyte(model.predict(img))
+
+        imsave(os.path.join(output_root, file_name[:-3] + "png"), edge)
+
+        sys.stdout.write("Processing Image %d/%d\r" % (i + 1, n_image))
+        sys.stdout.flush()
+    print
+
+
 if __name__ == "__main__":
     rand = N.random.RandomState(1)
 
@@ -541,5 +564,6 @@ if __name__ == "__main__":
     }
 
     model = StructuredForests(options, rand=rand)
-    model.train(bsds500_train("toy"))
-    bsds500_test(model, "toy", "edges")
+    #model.train(bsds500_train("toy"))
+    #bsds500_test(model, "toy", "edges")
+    my_test(model, "examples", "edges")
