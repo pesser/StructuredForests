@@ -11,7 +11,7 @@ ctypedef N.float64_t C_FLOAT64
 
 
 def build_feature_table(shrink, p_size, n_cell, n_ch):
-    p_size /= shrink
+    p_size //= shrink
 
     reg_tb = []
     for i in xrange(p_size):

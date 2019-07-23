@@ -82,7 +82,7 @@ class StructuredForests(BaseStructuredForests):
             self.load_model()
         except:
             self.model = {}
-            print >> sys.stderr, "No model file found. Training is required."
+            print("No model file found. Training is required.", file=sys.stderr)
 
         self.rand = rand
 
@@ -120,8 +120,8 @@ class StructuredForests(BaseStructuredForests):
         edge_pts = self.model["edge_pts"]
         n_seg = self.model["n_seg"]
         segs = self.model["segs"]
-        p_rad = p_size / 2
-        g_rad = g_size / 2
+        p_rad = p_size // 2
+        g_rad = g_size // 2
 
         pad = cv2.copyMakeBorder(src, p_rad, p_rad, p_rad, p_rad,
                                  borderType=cv2.BORDER_REFLECT)
@@ -159,7 +159,7 @@ class StructuredForests(BaseStructuredForests):
 
     def train(self, input_data):
         if self.trained:
-            print >> sys.stderr, "Model has been trained. Quit training."
+            print("Model has been trained. Quit training.", file=sys.stderr)
             return
 
         self.prepare_data(input_data)
@@ -189,11 +189,11 @@ class StructuredForests(BaseStructuredForests):
         n_smp_ftr_dim = int(n_ftr_dim * fraction)
         rand = self.rand
 
-        for i in xrange(n_tree):
+        for i in range(n_tree):
             data_file = self.data_prefix + str(i + 1) + ".h5"
             data_path = os.path.join(self.data_dir, data_file)
             if os.path.exists(data_path):
-                print "Found Data %d '%s', reusing..." % ((i + 1), data_file)
+                print("Found Data %d '%s', reusing..." % ((i + 1), data_file))
                 continue
 
             ftrs = N.zeros((n_pos + n_neg, n_smp_ftr_dim), dtype=N.float32)
@@ -214,12 +214,12 @@ class StructuredForests(BaseStructuredForests):
                     dis = distance_transform_edt(boundary == 0)
 
                     pos_loc = ((dis < g_rad) * mask).nonzero()
-                    pos_loc = zip(pos_loc[0].tolist(), pos_loc[1].tolist())
+                    pos_loc = list(zip(pos_loc[0].tolist(), pos_loc[1].tolist()))
                     pos_loc = [pos_loc[item] for item in
                                rand.permutation(len(pos_loc))[:n_pos_per_gt]]
 
                     neg_loc = ((dis >= g_rad) * mask).nonzero()
-                    neg_loc = zip(neg_loc[0].tolist(), neg_loc[1].tolist())
+                    neg_loc = list(zip(neg_loc[0].tolist(), neg_loc[1].tolist()))
                     neg_loc = [neg_loc[item] for item in
                                rand.permutation(len(neg_loc))[:n_neg_per_gt]]
 
@@ -245,13 +245,13 @@ class StructuredForests(BaseStructuredForests):
 
                 sys.stdout.write("Processing Data %d: %d/%d\r" % (i + 1, j + 1, n_img))
                 sys.stdout.flush()
-            print
+            print()
 
             with tables.open_file(data_path, "w", filters=self.comp_filt) as dfile:
                 dfile.create_carray("/", "ftrs", obj=ftrs[:total])
                 dfile.create_carray("/", "lbls", obj=lbls[:total])
                 dfile.create_carray("/", "sids", obj=sids.astype(N.int32))
-            print "Saving %d samples to '%s'..." % (total, data_file)
+            print("Saving %d samples to '%s'..." % (total, data_file))
 
     def train_tree(self):
         """
@@ -271,13 +271,13 @@ class StructuredForests(BaseStructuredForests):
                            discretize=self.options["discretize"],
                            rand=self.rand)
 
-        for i in xrange(n_tree):
+        for i in range(n_tree):
             data_file = self.data_prefix + str(i + 1) + ".h5"
             data_path = os.path.join(self.data_dir, data_file)
             tree_file = self.tree_prefix + str(i + 1) + ".h5"
             tree_path = os.path.join(self.tree_dir, tree_file)
             if os.path.exists(tree_path):
-                print "Found Tree %d '%s', reusing..." % ((i + 1), tree_file)
+                print("Found Tree %d '%s', reusing..." % ((i + 1), tree_file))
                 continue
 
             with tables.open_file(data_path, filters=self.comp_filt) as dfile:
@@ -301,7 +301,7 @@ class StructuredForests(BaseStructuredForests):
 
                 sys.stdout.write("Processing Tree %d/%d\r" % (i + 1, n_tree))
                 sys.stdout.flush()
-            print
+            print()
 
     def merge_trees(self):
         """
@@ -316,11 +316,11 @@ class StructuredForests(BaseStructuredForests):
 
         forest_path = os.path.join(self.forest_dir, self.forest_name)
         if os.path.exists(forest_path):
-            print "Found model, reusing..."
+            print("Found model, reusing...")
             return
 
         trees = []
-        for i in xrange(n_tree):
+        for i in range(n_tree):
             tree_file = self.tree_prefix + str(i + 1) + ".h5"
             tree_path = os.path.join(self.tree_dir, tree_file)
 
@@ -332,7 +332,7 @@ class StructuredForests(BaseStructuredForests):
             trees.append(tree)
 
         max_n_node = 0
-        for i in xrange(n_tree):
+        for i in range(n_tree):
             max_n_node = max(max_n_node, trees[i]["fids"].shape[0])
 
         # merge all fields of all trees
@@ -340,7 +340,7 @@ class StructuredForests(BaseStructuredForests):
         fids = N.zeros((n_tree, max_n_node), dtype=N.int32)
         cids = N.zeros((n_tree, max_n_node), dtype=N.int32)
         segs = N.zeros((n_tree, max_n_node, g_size, g_size), dtype=N.int32)
-        for i in xrange(n_tree):
+        for i in range(n_tree):
             tree = trees[i]
             n_node = tree["fids"].shape[0]
             thrs[i, :n_node] = tree["thrs"].flatten()
@@ -350,8 +350,8 @@ class StructuredForests(BaseStructuredForests):
 
         # remove very small segments (<=5 pixels)
         n_seg = N.max(segs.reshape((n_tree, max_n_node, g_size ** 2)), axis=2) + 1
-        for i in xrange(n_tree):
-            for j in xrange(max_n_node):
+        for i in range(n_tree):
+            for j in range(max_n_node):
                 m = n_seg[i, j]
                 if m <= 1:
                     continue
@@ -359,7 +359,7 @@ class StructuredForests(BaseStructuredForests):
                 S = segs[i, j]
                 remove = False
 
-                for k in xrange(m):
+                for k in range(m):
                     Sk = (S == k)
                     if N.count_nonzero(Sk) > 5:
                         continue
@@ -376,17 +376,17 @@ class StructuredForests(BaseStructuredForests):
         n_bnd = self.options["sharpen"] + 1
         edge_pts = []
         edge_bnds = N.zeros((n_tree, max_n_node, n_bnd), dtype=N.int32)
-        for i in xrange(n_tree):
-            for j in xrange(max_n_node):
+        for i in range(n_tree):
+            for j in range(max_n_node):
                 if cids[i, j] != 0 or n_seg[i, j] <= 1:
                     continue
 
                 E = gradient(segs[i, j].astype(N.float64))[0] > 0.01
                 E0 = 0
 
-                for k in xrange(n_bnd):
+                for k in range(n_bnd):
                     r, c = N.nonzero(E & (~ E0))
-                    edge_pts += [r[m] * g_size + c[m] for m in xrange(len(r))]
+                    edge_pts += [r[m] * g_size + c[m] for m in range(len(r))]
                     edge_bnds[i, j, k] = len(r)
 
                     E0 = E
@@ -436,7 +436,7 @@ def discretize(segs, n_class, n_sample, rand):
     ids2 = ids2[kp].astype(N.int32)
 
     zs = N.zeros((n, n_sample), dtype=N.float64)
-    for i in xrange(n):
+    for i in range(n):
         zs[i] = (segs[i][ids1] == segs[i][ids2])
     zs -= N.mean(zs, axis=0)
     zs = zs[:, N.any(zs, axis=0)]
@@ -453,7 +453,7 @@ def discretize(segs, n_class, n_sample, rand):
         d = min(5, n_sample, int(floor(log(n_class, 2))))
         zs = robust_pca(zs, d, rand=rand)[0]
         lbls = N.zeros(n, dtype=N.int32)
-        for i in xrange(d):
+        for i in range(d):
             lbls += (zs[:, i] < 0).astype(N.int32) * 2 ** i
         lbls = N.unique(lbls, return_inverse=True)[1].astype(N.int32)
 
@@ -492,7 +492,7 @@ def bsds500_test(model, input_root, output_root):
         os.makedirs(output_root)
 
     image_dir = os.path.join(input_root, "BSDS500", "data", "images", "test")
-    file_names = filter(lambda name: name[-3:] == "jpg", os.listdir(image_dir))
+    file_names = [name for name in os.listdir(image_dir) if name[-3:] == "jpg"]
     n_image = len(file_names)
 
     for i, file_name in enumerate(file_names):
@@ -504,7 +504,7 @@ def bsds500_test(model, input_root, output_root):
 
         sys.stdout.write("Processing Image %d/%d\r" % (i + 1, n_image))
         sys.stdout.flush()
-    print
+    print()
 
 
 def my_test(model, input_root, output_root):
@@ -515,7 +515,7 @@ def my_test(model, input_root, output_root):
         os.makedirs(output_root)
 
     image_dir = os.path.join(input_root)
-    file_names = filter(lambda name: name[-3:] in ["jpg", "png"], os.listdir(image_dir))
+    file_names = [name for name in os.listdir(image_dir) if name[-3:] in ["jpg", "png"]]
     n_image = len(file_names)
 
     for i, file_name in enumerate(file_names):
@@ -527,7 +527,7 @@ def my_test(model, input_root, output_root):
 
         sys.stdout.write("Processing Image %d/%d\r" % (i + 1, n_image))
         sys.stdout.flush()
-    print
+    print()
 
 
 if __name__ == "__main__":

@@ -134,7 +134,7 @@ class BaseStructuredForests(object):
         half_cell_size = int(round(p_size / (2.0 * n_cell)))
         grid_pos = [int(round((i + 1) * (p_size + 2 * half_cell_size - 1) / \
                               (n_cell + 1.0) - half_cell_size))
-                    for i in xrange(n_cell)]
+                    for i in range(n_cell)]
         grid_pos = [r * p_size + c for r in grid_pos for c in grid_pos]
         ss_ftr = ss_ftr[:, grid_pos]
 

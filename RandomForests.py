@@ -64,7 +64,7 @@ class RandomForests(object):
         forest = []
 
         # train M random trees on different subsets of data
-        for i in xrange(m):
+        for i in range(m):
             if n == sub_n:
                 data, hs = ftrs, lbls
             else:
